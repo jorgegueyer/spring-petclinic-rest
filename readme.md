@@ -91,6 +91,37 @@ or
 docker-compose --profile postgres up
 ```
 
+## Efficient processes
+
+[Efficient Spring Boot Application packaging](https://docs.spring.io/spring-boot/reference/packaging/index.html)
+
+### Combining Class Data Sharing & Ahead-of-Time
+
+[Spring Boot - Ahead-of-Time process](https://docs.spring.io/spring-boot/reference/packaging/aot.html)
+
+[Spring Boot - Class Data Sharing](https://docs.spring.io/spring-boot/reference/packaging/class-data-sharing.html)
+
+```bash
+mvn clean compile -U
+
+# Packaging using the Native profile (AOT process)
+mvn -Pnative package
+
+# Extract jar on layers
+java -Djarmode=tools -jar target/spring-petclinic-rest-*.jar extract --destination target/application
+
+# Creating JSA file
+java -XX:ArchiveClassesAtExit=target/application.jsa -Dspring.context.exit=onRefresh -jar target/application/spring-petclinic-rest-*.jar
+
+# Executing CDS mode
+java -XX:SharedArchiveFile=target/application.jsa -jar target/application/spring-petclinic-rest-*.jar
+
+# Executing AOT mode
+java -Dspring.aot.enabled=true -jar target/application/spring-petclinic-rest-*.jar
+
+# Combining CDS & AOT
+java -XX:SharedArchiveFile=target/application.jsa -Dspring.aot.enabled=true  -jar target/application/spring-petclinic-rest-*.jar
+```
 
 ## API First Approach
 
